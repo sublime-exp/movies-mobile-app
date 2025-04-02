@@ -1,0 +1,292 @@
+npx create-expo-app@latest ./
+npx expo start (scan the qr code on the app on the phone)
+app.json change "scheme" value to "movies"
+stop the procet ctr + c
+npm run reset-project (no)
+npm expo start
+R  (reload on the APP)
+
+in other terminal
+ npm install nativewind tailwindcss react-native-reanimated react-native-safe-area-context
+ npx tailwind init
+
+ update the tailwind.config.js:
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: ["./app/**/*.{js,jsx,ts,tsx}"],
+  presets: [require("nativewind/preset")],
+  theme: {
+    extend: {
+      colors: {
+        primary: "#030014",
+        secondary: "#151312",
+        light: {
+          100: "#D6C6FF",
+          200: "#A8B5DB",
+          300: "#9CA4AB"
+        },
+        dark: {
+          100: "#221f3d",
+          200: "#0f0d23"
+        },
+        accent: "#AB8BFF",
+      }
+    },
+  },
+  plugins: [],
+}
+
+
+create file named: global.css in app folder:
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+create in root folder new file babel.config.js with this content:
+module.exports = function (api) {
+  api.cache(true);
+  return {
+    presets: [
+      ["babel-preset-expo", { jsxImportSource: "nativewind" }],
+      "nativewind/babel",
+    ],
+  };
+};
+
+npx expo customize metro.config.js
+(replace the content of the file with this)
+
+const { getDefaultConfig } = require("expo/metro-config");
+const { withNativeWind } = require('nativewind/metro');
+
+const config = getDefaultConfig(__dirname)
+
+module.exports = withNativeWind(config, { input: './app/global.css' })
+
+
+import "./global.css" in app/_layout.tsx
+
+in root folder create file nativewind-env.d.ts with content: /// <reference types="nativewind/types" />
+
+restart app:
+ctrl + c
+npx expo start --clear
+r (for reaload)
+
+replace styles in index.tsx with
+for the View tag -> className="flex-1 justify-center items-center"
+for the Text tag -> className="text-5xl text-dark-200 font-bold"
+
+create onboarding.tsx in app folder and type rnfes and tab (install react buddy plugin)
+
+ <Link href="/onboarding">Onboarding</Link> (import from expo-routinh) add this in index.tsx in under the Text tag
+
+create app/detail folder and file [id].tsx then rnfes and fix it (its dynamic route for details of a movie)
+
+import React from 'react'
+import {useLocalSearchParams} from "expo-router";
+
+const Details = () => {
+    const {id} = useLocalSearchParams()
+    return (
+        <View>
+            <Text>Movie details: {id}</Text>
+        </View>
+    )
+}
+export default Details;
+const styles = StyleSheet.create({})
+
+ <Link href="/movie/avengers">Avenger Movie</Link>  add this in index.tsx
+
+now remove all links and movie folder and onboarding.tsx
+create (tabs) folder in app
+move the index.tsx to that folder and create _layout.tsx file there too
+create profile.tsx with rnfe in that folder
+create saved.tsx with rnfe in that folder
+create search.tsx with rnfe in that folder
+
+create movies folder in app and in there dymanic route file [id].tsx with rnfe and name it MovieDetails
+
+in app/_layout.tsx modify the Stack to this ->
+
+export default function RootLayout() {
+  return <Stack>
+    <Stack.Screen
+    name="(tabs)"
+    options={{headerShown: false}}
+    />
+    <Stack.Screen
+        name="movie/[id]"
+        options={{headerShown: false}}
+    />
+  </Stack>;
+}
+
+and in (tabs)/_layout.tsx type rnfe
+
+import React from 'react'
+import {Tabs} from "expo-router";
+import {images} from "@/constants/images";
+import {icons} from "@/constants/icons";
+import {Image, ImageBackground, Text, View} from "react-native";
+
+const TabIcon = ({focused, icon, title}: any) => {
+    if (focused) {
+        return (
+            <ImageBackground
+                source={images.highlight}
+                className="flex flex-row w-full flex-1 min-w-[112px] min-h-14 mt-4 justify-center items-center rounded-full overflow-hidden"
+            >
+                <Image source={icon} tintColor="#151312" className="size-5"/>
+                <Text className="text-secondary text-base font-semibold ml-2">{title}
+                </Text>
+            </ImageBackground>
+        )
+    }
+    return (
+        <View className="size-full justify-center items-center mt-4 rounded-full">
+            <Image source={icon} tintColor="#A8B5DB" className="size-5"/>
+        </View>
+    )
+}
+
+const _Layout = () => {
+    return (
+        <Tabs
+            screenOptions={{
+                tabBarShowLabel: false,
+                tabBarItemStyle: {
+                    width: "100%",
+                    height: "42%",
+                    justifyContent: "center",
+                    alignItems: "center"
+                },
+                tabBarStyle: {
+                    backgroundColor: "#0f0D23",
+                    borderRadius: 50,
+                    marginHorizontal: 20,
+                    marginBottom: 36,
+                    height: 49,
+                    position: "absolute",
+                    overflow: "hidden",
+                    borderWidth: 1,
+                    borderColor: "#0f0D23"
+                }
+            }}
+        >
+            <Tabs.Screen
+                name="index"
+                options={{
+                    title: 'Home',
+                    headerShown: false,
+                    tabBarIcon: ({focused}) => (
+                        <TabIcon focused={focused}
+                                 icon={icons.home}
+                                 title="Home"/>
+                    )
+                }}
+            />
+            <Tabs.Screen
+                name="search"
+                options={{
+                    title: 'Search',
+                    headerShown: false,
+                    tabBarIcon: ({focused}) => (
+                        <TabIcon focused={focused}
+                                 icon={icons.search}
+                                 title="Search"/>
+                    )
+                }}
+            />
+            <Tabs.Screen
+                name="saved"
+                options={{
+                    title: 'Saved',
+                    headerShown: false,
+                    tabBarIcon: ({focused}) => (
+                        <TabIcon focused={focused}
+                                 icon={icons.save}
+                                 title="Saved"/>
+                    )
+                }}
+            />
+            <Tabs.Screen
+                name="profile"
+                options={{
+                    title: 'Profile',
+                    headerShown: false,
+                    tabBarIcon: ({focused}) => (
+                        <TabIcon focused={focused}
+                                 icon={icons.person}
+                                 title="Profile"/>
+                    )
+                }}
+            />
+        </Tabs>
+    )
+}
+export default _Layout
+
+delete asset folder and download the asset from the guthub repo and add them to the root folder
+
+
+in app.json fix the path to the logo
+ "icon": "./assets/images/logo.png",
+ "image": "./assets/images/logo.png",
+ "favicon": "./assets/images/logo.png",
+ "foregroundImage": "./assets/images/logo.png",
+
+modify the index.tsx
+create components folder and SearchBar.tsx file
+
+add searchBar in index.tsx
+
+modify searchBar component styles
+
+import router in index.tsx and modify to pass params to child component
+
+create account here https://developer.themoviedb.org/reference/intro/getting-started
+
+create new folder services
+
+create file api.ts inside
+
+create .env file
+save the api key of the movie db there
+
+edit the tailwind config to add for the component folder too
+
+in appwrite create app copy key in .env file of the project
+
+integrate with react-native choose for IOS choose name and bundle id and then use the generated command
+
+npx expo install react-native-appwrite react-native-url-polyfill
+
+create database movies and collection metrics
+
+add the ids in .env file
+
+add attribute in the collection
+
+searchTerm
+string
+
+count
+integer
+0
+
+poster_url
+url
+
+movie_id
+integer
+
+title
+string
+
+go in settings add permissions: any with all rights for CRUD
+
+npm install --save @react-native-masked-view/masked-view
+
+npm install --save-dev @types/react-native@latest
