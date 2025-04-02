@@ -1,3 +1,10 @@
+useful links:
+https://docs.expo.dev/get-started/create-a-project
+https://reactnative.dev/docs/environment-setup
+https://www.themoviedb.org/settings/api
+https://developer.themoviedb.org/reference/discover-movie
+https://cloud.appwrite.io
+
 npx create-expo-app@latest ./
 npx expo start (scan the qr code on the app on the phone)
 app.json change "scheme" value to "movies"
